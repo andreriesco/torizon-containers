@@ -21,7 +21,7 @@ fi
 
 declare -A BUILD_TARGETS=(
   ["BUILD_FOR_ARM_V7"]="linux/arm/v7"
-  ["BUILD_FOR_ARM_V8"]="linux/arm64/v8"
+  ["BUILD_FOR_ARM_V8"]="linux/arm64"
   ["BUILD_FOR_AMD64"]="linux/amd64"
 )
 
@@ -69,7 +69,7 @@ if [[ "${CI_COMMIT_REF_PROTECTED}" == "true" ]]; then
   export IMAGE_TAG=${CI_COMMIT_BRANCH}-rc
 fi
 
-if [[ "${CI_PIPELINE_SOURCE}" == "merge_request_event" || "${CI_COMMIT_REF_PROTECTED}" == "false" || ${CI_WORLD_TEST} == "true" ]]; then
+if [[ "${CI_PIPELINE_SOURCE}" == "merge_request_event" || "${CI_COMMIT_REF_PROTECTED}" == "false" || ${CI_WORLD_TEST} == "true" || $(env | grep -c '^CI_TEST') -gt 0 ]]; then
   export PULL_REGISTRY=${CI_REGISTRY}
   export PUSH_REGISTRY=${CI_REGISTRY}
   export REGISTRY_NAMESPACE=${CI_PROJECT_PATH}
@@ -77,7 +77,7 @@ if [[ "${CI_PIPELINE_SOURCE}" == "merge_request_event" || "${CI_COMMIT_REF_PROTE
 fi
 
 # shellcheck disable=SC2086
-docker buildx build --progress=plain --sbom=true ${BUILD_PLATFORMS} \
+docker buildx build --progress=plain --sbom=true --push ${BUILD_PLATFORMS} \
   --build-arg ACCEPT_FSL_EULA="${ACCEPT_FSL_EULA}" \
   --build-arg TORADEX_FEED_URL="${TORADEX_FEED_URL}" \
   --build-arg BASE_IMAGE_NAME="${BASE_IMAGE_NAME}" \
@@ -100,6 +100,10 @@ docker buildx build --progress=plain --sbom=true ${BUILD_PLATFORMS} \
   --label torizon.git.pipeline="${CI_PIPELINE_ID}" \
   --label torizon.debian.snapshot="${TORADEX_SNAPSHOT}" \
   -f "${DOCKERFILE_FOLDER}Dockerfile" \
-  --output type=registry,name="${PUSH_REGISTRY}/${REGISTRY_NAMESPACE}/${IMAGE_NAME}:${IMAGE_TAG}",compression=zstd \
   ${ADDITIONAL_DOCKER_BUILD_OPTIONS} \
+  -t "${PUSH_REGISTRY}/${REGISTRY_NAMESPACE}/${IMAGE_NAME}:${IMAGE_TAG}" \
   "${DOCKERFILE_BUILD_CONTEXT_FOLDER}"
+
+for PLATFORM in "${SELECTED_PLATFORMS[@]}"; do
+  trivy image --platform="$PLATFORM" --scanners secret "${PUSH_REGISTRY}/${REGISTRY_NAMESPACE}/${IMAGE_NAME}:${IMAGE_TAG}"
+done

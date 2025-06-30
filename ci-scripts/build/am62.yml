@@ -2,11 +2,11 @@
   retry: 2
   extends: .docker-build
   rules:
-    - if: $CI_WORLD_TEST == "true" || $CI_COMMIT_TAG == "true"
-      when: never
-    - if: $CI_WORLD_REBUILD == "true" || $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: '$CI_WORLD_REBUILD == "true" && $CI_WORLD_TEST != "true" && $CI_COMMIT_TAG != "true"'
       when: always
-    - if: $CI_COMMIT_REF_PROTECTED == "true"
+      variables:
+        REGISTRY_NAMESPACE: $PROJECT_SETTING_REGISTRY_NAMESPACE
+    - if: '$CI_BUILD_AM62 == "true" && $CI_WORLD_TEST != "true" && $CI_COMMIT_TAG != "true"'
       when: always
       variables:
         REGISTRY_NAMESPACE: $PROJECT_SETTING_REGISTRY_NAMESPACE
@@ -124,9 +124,18 @@ build-chromium-am62:
   variables:
     BASE_IMAGE_NAME: wayland-base-am62
     IMAGE_NAME: chromium-am62
-    DOCKERFILE_FOLDER: "${CHROMIUM_FOLDER}/"
-    DOCKERFILE_BUILD_CONTEXT_FOLDER: "${SUPPORT_FILES_FOLDER}/${CHROMIUM_FOLDER}/"
+    DOCKERFILE_FOLDER: "${PLATFORM_SPECIFIC_FOLDER}/${AM62_FOLDER}/${CHROMIUM_FOLDER}/"
+    DOCKERFILE_BUILD_CONTEXT_FOLDER: "${PLATFORM_SPECIFIC_FOLDER}/${AM62_FOLDER}/${CHROMIUM_FOLDER}/"
   needs: [build-wayland-base-am62]
+
+build-chromium-tests-am62:
+  extends: .build-am62-template
+  variables:
+    BASE_IMAGE_NAME: chromium-am62
+    IMAGE_NAME: chromium-tests-am62
+    DOCKERFILE_FOLDER: "${PLATFORM_SPECIFIC_FOLDER}/${AM62_FOLDER}/${TESTS_FOLDER}/${CHROMIUM_TESTS_FOLDER}/"
+    DOCKERFILE_BUILD_CONTEXT_FOLDER: "${PLATFORM_SPECIFIC_FOLDER}/${AM62_FOLDER}/${TESTS_FOLDER}/${CHROMIUM_TESTS_FOLDER}/"
+  needs: [build-chromium-am62]
 
 build-cog-am62:
   extends: .build-am62-template

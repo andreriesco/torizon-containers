@@ -3,29 +3,41 @@
 setup_qt6() {
   DOCKER_RUN_AM62="docker container run -d -it --privileged --name=qt6-wayland-tests \
               -v /dev:/dev -v /run/udev/:/run/udev/ -v /tmp:/tmp \
-              $REGISTRY/torizon/qt6-wayland-tests-am62:stable-rc"
+              $REGISTRY/torizon/qt6-wayland-tests-am62:stable-rc bash"
+
+  DOCKER_RUN_AM62P="docker container run -d -it --privileged --name=qt6-wayland-tests \
+              -v /dev:/dev -v /run/udev/:/run/udev/ -v /tmp:/tmp \
+              $REGISTRY/torizon/qt6-wayland-tests-am62p:stable-rc bash"
+
+  DOCKER_RUN_AM69="docker container run -d -it --privileged --name=qt6-wayland-tests \
+              -v /dev:/dev -v /run/udev/:/run/udev/ -v /tmp:/tmp \
+              $REGISTRY/torizon/qt6-wayland-tests-am69:stable-rc bash"
 
   DOCKER_RUN_IMX8="docker container run -d -it --privileged --name=qt6-wayland-tests \
               -v /dev:/dev -v /run/udev/:/run/udev/ -v /tmp:/tmp \
-              $REGISTRY/torizon/qt6-wayland-tests-imx8:stable-rc"
+              $REGISTRY/torizon/qt6-wayland-tests-imx8:stable-rc bash"
 
   DOCKER_RUN_IMX95="docker container run -d -it --privileged --name=qt6-wayland-tests \
               -v /dev:/dev -v /run/udev/:/run/udev/ -v /tmp:/tmp \
-              $REGISTRY/torizon/qt6-wayland-tests-imx95:stable-rc"
+              $REGISTRY/torizon/qt6-wayland-tests-imx95:stable-rc bash"
 
   DOCKER_RUN_UPSTREAM="docker container run -d -it --privileged --name=qt6-wayland-tests \
               -v /dev:/dev -v /run/udev/:/run/udev/ -v /tmp:/tmp \
-              $REGISTRY/torizon/qt6-wayland-tests:stable-rc"
+              $REGISTRY/torizon/qt6-wayland-tests:stable-rc bash"
 
   docker container kill qt6-wayland-tests || true
   docker container rm qt6-wayland-tests || true
 
-  if [[ "$PLATFORM_FILTER" == *am62* ]]; then
+  if [[ "$PLATFORM_FILTER" == *am62p* ]]; then
+    DOCKER_RUN=$DOCKER_RUN_AM62P
+  elif [[ "$PLATFORM_FILTER" == *am62* ]]; then
     DOCKER_RUN=$DOCKER_RUN_AM62
   elif [[ "$PLATFORM_FILTER" == *imx8* ]]; then
     DOCKER_RUN=$DOCKER_RUN_IMX8
   elif [[ "$PLATFORM_FILTER" == *imx95* ]]; then
     DOCKER_RUN=$DOCKER_RUN_IMX95
+  elif [[ "$PLATFORM_FILTER" == *am69* ]]; then
+    DOCKER_RUN=$DOCKER_RUN_AM69
   else
     DOCKER_RUN=$DOCKER_RUN_UPSTREAM
   fi

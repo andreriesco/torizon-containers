@@ -1,11 +1,15 @@
 #!/bin/bash
 
-if [[ "$SOC_UDT" == *am62* ]]; then
+if [[ "$SOC_UDT" == *am62p* ]]; then
+  PLATFORM_FILTER="platform:am62p"
+elif [[ "$SOC_UDT" == *am62* ]]; then
   PLATFORM_FILTER="platform:am62"
 elif [[ "$SOC_UDT" == *imx8* ]]; then
   PLATFORM_FILTER="platform:imx8"
 elif [[ "$SOC_UDT" == *imx95* ]]; then
   PLATFORM_FILTER="platform:imx95"
+elif [[ "$SOC_UDT" == *am69* ]]; then
+  PLATFORM_FILTER="platform:am69"
 else
   PLATFORM_FILTER="platform:upstream"
 fi

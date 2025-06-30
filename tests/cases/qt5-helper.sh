@@ -1,44 +1,22 @@
 #!/usr/bin/env bash
 
 setup_qt5() {
-  DOCKER_RUN_AM62="docker container run -d -it --name=qt5-wayland-examples \
-              -v /dev:/dev -v /run/udev/:/run/udev/ -v /tmp:/tmp \
-              --device-cgroup-rule='c 4:* rmw'  --device-cgroup-rule='c 13:* rmw' \
-              --device-cgroup-rule='c 29:* rmw' --device-cgroup-rule='c 226:* rmw' \
-              $REGISTRY/torizon/qt5-wayland-examples-am62:stable-rc"
-
-  DOCKER_RUN_IMX8="docker container run -d -it --name=qt5-wayland-examples \
-              -v /dev:/dev -v /run/udev/:/run/udev/ -v /tmp:/tmp \
-              --device-cgroup-rule='c 4:* rmw' --device-cgroup-rule='c 13:* rmw' \
-              --device-cgroup-rule='c 29:* rmw' --device-cgroup-rule='c 199:* rmw' \
-	      --device-cgroup-rule='c 226:* rmw' \
-              $REGISTRY/torizon/qt5-wayland-examples-imx8:stable-rc"
-
-  DOCKER_RUN_IMX95="docker container run -d -it --name=qt5-wayland-examples \
-              -v /dev:/dev -v /run/udev/:/run/udev/ -v /tmp:/tmp \
-              --device-cgroup-rule='c 4:* rmw' --device-cgroup-rule='c 13:* rmw' \
-              --device-cgroup-rule='c 29:* rmw' --device-cgroup-rule='c 199:* rmw' \
-	      --device-cgroup-rule='c 226:* rmw' \
-              $REGISTRY/torizon/qt5-wayland-examples-imx95:stable-rc"
-
-  DOCKER_RUN_UPSTREAM="docker container run -d -it --name=qt5-wayland-examples \
-              -v /dev:/dev -v /run/udev/:/run/udev/ -v /tmp:/tmp \
-              --device-cgroup-rule='c 4:* rmw'  --device-cgroup-rule='c 13:* rmw' \
-              --device-cgroup-rule='c 29:* rmw' --device-cgroup-rule='c 226:* rmw' \
-              $REGISTRY/torizon/qt5-wayland-examples:stable-rc"
-
   docker container kill qt5-wayland-examples || true
   docker container rm qt5-wayland-examples || true
 
-  if [[ "$PLATFORM_FILTER" == *am62* ]]; then
-    DOCKER_RUN=$DOCKER_RUN_AM62
+  local DOCKER_RUN
+  if [[ "$PLATFORM_FILTER" == *am62p* ]]; then
+    DOCKER_RUN=$(read-docker-run.sh "/runs/qt5-wayland-examples/qt5-wayland-examples-am62p-compose.run" "qt5-wayland-examples-am62p" "qt5-wayland-examples" "bash")
+  elif [[ "$PLATFORM_FILTER" == *am62* ]]; then
+    DOCKER_RUN=$(read-docker-run.sh "/runs/qt5-wayland-examples/qt5-wayland-examples-am62-compose.run" "qt5-wayland-examples-am62" "qt5-wayland-examples" "bash")
   elif [[ "$PLATFORM_FILTER" == *imx8* ]]; then
-    DOCKER_RUN=$DOCKER_RUN_IMX8
-  elif [[ "$PLATFORM_FILTER" == *imx95* ]]; then
-    DOCKER_RUN=$DOCKER_RUN_IMX95
+    DOCKER_RUN=$(read-docker-run.sh "/runs/qt5-wayland-examples/qt5-wayland-examples-imx8-compose.run" "qt5-wayland-examples-imx8" "qt5-wayland-examples" "bash")
   else
-    DOCKER_RUN=$DOCKER_RUN_UPSTREAM
+    DOCKER_RUN=$(read-docker-run.sh "/runs/qt5-wayland-examples/qt5-wayland-examples-upstream-compose.run" "qt5-wayland-examples" "qt5-wayland-examples" "bash")
   fi
+
+  # Add -it flag to match the original behavior
+  DOCKER_RUN=${DOCKER_RUN//-d --name=/-d -it --name=}
 
   eval "$DOCKER_RUN"
 

@@ -1,19 +1,21 @@
 include:
-  - "/ci-scripts/release/release.yml"
   - "/ci-scripts/test/aval-tests.yml"
-  - "/ci-scripts/test/dotnet-tests.yml"
+  - "/ci-scripts/release/release.yml"
   - "/ci-scripts/test/support-files-tests.yml"
   - "/ci-scripts/build/upstream.yml"
   - "/ci-scripts/build/imx8.yml"
   - "/ci-scripts/build/imx95.yml"
   - "/ci-scripts/build/am62.yml"
+  - "/ci-scripts/build/am62p.yml"
   - "/ci-scripts/build/am69.yml"
   - "/ci-scripts/lint/lint.yml"
+  - "/ci-scripts/generate/generate.yml"
+  - "/ci-scripts/demo-gallery/demo-gallery.yml"
 
 image: docker:latest
 
 variables:
-  DEBIAN_POINT_RELEASE: "12.10-slim"
+  DEBIAN_POINT_RELEASE: "12.11-slim"
   TORADEX_INTERNAL_DOCKERHUB_CACHE: "artifactory-horw.int.toradex.com/dockerhub-proxy-no-cache-horw"
   # This should be set by docker image already, just to be sure...
   DOCKER_HOST: tcp://docker:2375
@@ -26,6 +28,7 @@ variables:
   IMX8_FOLDER: "imx8"
   IMX95_FOLDER: "imx95"
   AM62_FOLDER: "am62"
+  AM62P_FOLDER: "am62p"
   AM69_FOLDER: "am69"
   UPSTREAM_FOLDER: "upstream"
   TESTS_FOLDER: "tests"
@@ -73,13 +76,10 @@ services:
     - chmod 755 /usr/bin/regctl
     - regctl registry login docker.io -u $DOCKERHUB_USER -p $DOCKERHUB_TOKEN
 
-.do_print_environment_variables: &do_print_environment_variables
-  - echo "GitLab CI/CD environment variables:"
-  - env
-
 .docker-configure:
   script:
-    - apk add bash
+    - apk add bash curl
+    - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.57.1
     - ./ci-scripts/configure/docker-buildx-configure.sh
 
 .docker-build:
@@ -88,6 +88,5 @@ services:
     ADD_TORADEX_REPOSITORY: 1
   script:
     - !reference [.docker-configure, script]
-    - *do_print_environment_variables
     - apk add curl bash
     - ./ci-scripts/build/docker-build.sh

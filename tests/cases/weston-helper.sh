@@ -1,52 +1,18 @@
 #!/usr/bin/env bash
 
 setup_weston() {
-  local WESTON_RUN_AM62="docker container run -d --name=weston --net=host \
-        --cap-add CAP_SYS_TTY_CONFIG -v /dev:/dev -v /tmp:/tmp \
-        -v /run/udev/:/run/udev/ --device-cgroup-rule='c 4:* rmw' \
-        --device-cgroup-rule='c 13:* rmw' --device-cgroup-rule='c 226:* rmw' \
-        --device-cgroup-rule='c 10:223 rmw' \
-        $REGISTRY/torizon/weston-am62:stable-rc \
-        --developer --tty=/dev/tty7 -- --debug"
-
-  local WESTON_RUN_IMX8="docker container run -d --name=weston --net=host \
-        --cap-add CAP_SYS_TTY_CONFIG \
-        -v /dev:/dev -v /tmp:/tmp -v /run/udev/:/run/udev/ \
-        --device-cgroup-rule='c 4:* rmw' --device-cgroup-rule='c 253:* rmw' \
-        --device-cgroup-rule='c 13:* rmw' --device-cgroup-rule='c 226:* rmw' \
-        --device-cgroup-rule='c 10:223 rmw' --device-cgroup-rule='c 199:0 rmw' \
-        $REGISTRY/torizon/weston-imx8:stable-rc \
-        --developer --tty=/dev/tty7 -- --debug"
-
-  local WESTON_RUN_IMX95="docker container run -d --name=weston --net=host \
-        --cap-add CAP_SYS_TTY_CONFIG \
-        -v /dev:/dev -v /tmp:/tmp -v /run/udev/:/run/udev/ \
-        --device-cgroup-rule='c 4:* rmw' --device-cgroup-rule='c 253:* rmw' \
-        --device-cgroup-rule='c 13:* rmw' --device-cgroup-rule='c 226:* rmw' \
-        --device-cgroup-rule='c 10:223 rmw' --device-cgroup-rule='c 199:0 rmw' \
-        $REGISTRY/torizon/weston-imx95:stable-rc \
-        --developer --tty=/dev/tty7 -- --debug"
-
-  local WESTON_RUN_UPSTREAM="docker container run -d --name=weston --net=host \
-        --cap-add CAP_SYS_TTY_CONFIG -v /dev:/dev -v /tmp:/tmp \
-        -v /run/udev/:/run/udev/ --device-cgroup-rule='c 4:* rmw' \
-        --device-cgroup-rule='c 13:* rmw' --device-cgroup-rule='c 226:* rmw' \
-        --device-cgroup-rule='c 10:223 rmw' \
-        $REGISTRY/torizon/weston:stable-rc \
-        --developer --tty=/dev/tty7 -- --debug"
-
   docker container kill weston || true
   docker container rm weston || true
 
   local DOCKER_RUN
-  if [[ "$PLATFORM_FILTER" == *am62* ]]; then
-    DOCKER_RUN="$WESTON_RUN_AM62"
+  if [[ "$PLATFORM_FILTER" == *am62p* ]]; then
+    DOCKER_RUN=$(read-docker-run.sh "/runs/weston/weston-am62p-compose.run" "weston-am62p" "weston")
+  elif [[ "$PLATFORM_FILTER" == *am62* ]]; then
+    DOCKER_RUN=$(read-docker-run.sh "/runs/weston/weston-am62-compose.run" "weston-am62" "weston")
   elif [[ "$PLATFORM_FILTER" == *imx8* ]]; then
-    DOCKER_RUN="$WESTON_RUN_IMX8"
-  elif [[ "$PLATFORM_FILTER" == *imx95* ]]; then
-    DOCKER_RUN=$WESTON_RUN_IMX95
+    DOCKER_RUN=$(read-docker-run.sh "/runs/weston/weston-imx8-compose.run" "weston-imx8" "weston")
   else
-    DOCKER_RUN="$WESTON_RUN_UPSTREAM"
+    DOCKER_RUN=$(read-docker-run.sh "/runs/weston/weston-upstream-compose.run" "weston" "weston")
   fi
 
   eval "$DOCKER_RUN"

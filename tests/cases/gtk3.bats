@@ -10,6 +10,20 @@ DOCKER_RUN_AM62="docker container run -d -it \
     --device-cgroup-rule='c 226:* rmw' \
     $REGISTRY/torizon/gtk3-tests-am62:stable-rc bash"
 
+DOCKER_RUN_AM62P="docker container run -d -it \
+    --name=gtk3-tests -v /dev:/dev -v /tmp:/tmp \
+    --device-cgroup-rule='c 4:* rmw'  \
+    --device-cgroup-rule='c 13:* rmw' \
+    --device-cgroup-rule='c 226:* rmw' \
+    $REGISTRY/torizon/gtk3-tests-am62p:stable-rc bash"
+
+DOCKER_RUN_AM69="docker container run -d -it \
+    --name=gtk3-tests -v /dev:/dev -v /tmp:/tmp \
+    --device-cgroup-rule='c 4:* rmw'  \
+    --device-cgroup-rule='c 13:* rmw' \
+    --device-cgroup-rule='c 226:* rmw' \
+    $REGISTRY/torizon/gtk3-tests-am69:stable-rc bash"
+
 DOCKER_RUN_IMX8="docker container run -d -it \
     --name=gtk3-tests -v /dev:/dev -v /tmp:/tmp \
     --device-cgroup-rule='c 4:* rmw'  \
@@ -40,12 +54,16 @@ setup_file() {
   docker container kill gtk3-tests || true
   docker container rm gtk3-tests || true
 
-  if [[ "$PLATFORM_FILTER" == *am62* ]]; then
+  if [[ "$PLATFORM_FILTER" == *am62p* ]]; then
+    DOCKER_RUN=$DOCKER_RUN_AM62P
+  elif [[ "$PLATFORM_FILTER" == *am62* ]]; then
     DOCKER_RUN=$DOCKER_RUN_AM62
   elif [[ "$PLATFORM_FILTER" == *imx8* ]]; then
     DOCKER_RUN=$DOCKER_RUN_IMX8
   elif [[ "$PLATFORM_FILTER" == *imx95* ]]; then
     DOCKER_RUN=$DOCKER_RUN_IMX95
+  elif [[ "$PLATFORM_FILTER" == *am69* ]]; then
+    DOCKER_RUN=$DOCKER_RUN_AM69
   else
     DOCKER_RUN=$DOCKER_RUN_UPSTREAM
   fi
@@ -63,7 +81,7 @@ teardown_file() {
   teardown_weston
 }
 
-# bats test_tags=platform:imx8, platform:imx95, platform:am62, platform:upstream
+# bats test_tags=platform:imx8, platform:imx95, platform:am62, platform:am62p, platform:upstream, platform:am69
 @test "Simple GTK3 application runs" {
   bats_require_minimum_version 1.5.0
 
@@ -76,7 +94,7 @@ teardown_file() {
   echo "Ran for 10 seconds without crashing, terminated by timeout."
 }
 
-# bats test_tags=platform:imx8, platform:imx95, platform:am62, platform:upstream
+# bats test_tags=platform:imx8, platform:imx95, platform:am62, platform:am62p, platform:upstream, platform:am69
 @test "gtk3-icon-browser runs" {
   bats_require_minimum_version 1.5.0
 

@@ -1,27 +1,18 @@
 #!/usr/bin/env bats
 
 load ./weston-helper.sh
+load ./qt6-enterprise-helper.sh
 load ./kernel-helper.sh
 load ./general-helper.sh
 
-DOCKER_RUN_IMX8="docker container run -d -it --net=host --name=qt6-enterprise-demo \
-             --cap-add CAP_SYS_TTY_CONFIG -v /dev:/dev -v /tmp:/tmp -v /run/udev/:/run/udev/ \
-             --device-cgroup-rule='c 4:* rmw'  --device-cgroup-rule='c 13:* rmw' \
-             --device-cgroup-rule='c 226:* rmw' --device-cgroup-rule='c 29:* rmw' --device-cgroup-rule='c 199:* rmw' \
-             $REGISTRY/torizon/qt6-enterprise-demo-imx8:stable-rc bash"
-
 setup_file() {
-
-  docker container kill qt6-enterprise-demo || true
-  docker container rm qt6-enterprise-demo || true
-
-  DOCKER_RUN=$DOCKER_RUN_IMX8
-
-  eval "$DOCKER_RUN"
+  setup_weston
+  setup_qt6_enterprise
 }
 
 teardown_file() {
-  cleanup_container qt6-enterprise-demo
+  teardown_qt6_enterprise
+  teardown_weston
 }
 
 # bats test_tags=platform:imx8
@@ -30,7 +21,7 @@ teardown_file() {
 
   run -0 clean_kernel_logs
 
-  run -124 docker container exec -e QT_QPA_PLATFORM=wayland qt6-enterprise-demo timeout 10s /opt/b2qt-demolauncher/qtlauncher
+  run -124 docker container exec -e QT_QPA_PLATFORM=wayland qt6-enterprise timeout 10s /opt/b2qt-demolauncher/qtlauncher
 
   run -0 gpu_kernel_logs
 }
@@ -41,7 +32,7 @@ teardown_file() {
 
   run -0 clean_kernel_logs
 
-  run -124 docker container exec -e QT_QPA_PLATFORM=wayland qt6-enterprise-demo timeout 10s /usr/local/bin/coffeemachine
+  run -124 docker container exec -e QT_QPA_PLATFORM=wayland qt6-enterprise timeout 10s /usr/local/bin/coffeemachine
 
   run -0 gpu_kernel_logs
 }
@@ -52,7 +43,7 @@ teardown_file() {
 
   run -0 clean_kernel_logs
 
-  run -124 docker container exec -e QT_QPA_PLATFORM=wayland qt6-enterprise-demo timeout 10s /usr/local/bin/RobotArmApp
+  run -124 docker container exec -e QT_QPA_PLATFORM=wayland qt6-enterprise timeout 10s /usr/local/bin/RobotArmApp
 
   run -0 gpu_kernel_logs
 }
@@ -63,7 +54,7 @@ teardown_file() {
 
   run -0 clean_kernel_logs
 
-  run -124 docker container exec -e QT_QPA_PLATFORM=wayland qt6-enterprise-demo timeout 10s /usr/local/bin/ThermostatApp
+  run -124 docker container exec -e QT_QPA_PLATFORM=wayland qt6-enterprise timeout 10s /usr/local/bin/ThermostatApp
 
   run -0 gpu_kernel_logs
 }

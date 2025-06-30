@@ -17,7 +17,7 @@ teardown_file() {
   teardown_qt6
 }
 
-# bats test_tags=platform:imx8, platform:imx95, platform:am62, platform:upstream
+# bats test_tags=platform:imx8, platform:imx95, platform:am62, platform:am62p, platform:upstream, platform:am69
 @test "Qt6 EGL kmscube runs" {
   bats_require_minimum_version 1.5.0
 
@@ -29,7 +29,7 @@ teardown_file() {
   run -0 gpu_kernel_logs
 }
 
-# bats test_tags=platform:imx8, platform:imx95, platform:am62, platform:upstream
+# bats test_tags=platform:imx8, platform:imx95, platform:am62, platform:am62p, platform:upstream, platform:am69
 @test "Qt6 LinuxFB shapedclock runs" {
   bats_require_minimum_version 1.5.0
 
@@ -41,7 +41,7 @@ teardown_file() {
   run -0 gpu_kernel_logs
 }
 
-# bats test_tags=platform:imx8, platform:imx95, platform:am62, platform:upstream
+# bats test_tags=platform:imx8, platform:imx95, platform:am62, platform:am62p, platform:upstream, platform:am69
 @test "Qt6 can create OpenGLES context" {
   bats_require_minimum_version 1.5.0
 
@@ -50,7 +50,7 @@ teardown_file() {
   run docker container exec -e QT_QPA_PLATFORM=eglfs qt6-wayland-tests \
     kms-setup.sh contextinfo
 
-  assert_output --regexp "OpenGL Version: OpenGL ES [23]\.[02].*"
+  assert_output --regexp "OpenGL Version: OpenGL ES [23]\.[012].*"
 
   run -0 gpu_kernel_logs
 }

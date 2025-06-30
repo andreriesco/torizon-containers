@@ -22,7 +22,7 @@ teardown_file() {
   teardown_weston
 }
 
-# bats test_tags=platform:imx8, platform:imx95, platform:am62, platform:upstream
+# bats test_tags=platform:imx8, platform:imx95, platform:am62, platform:am62p, platform:upstream, platform:am69
 @test "Qt6 cube runs" {
   bats_require_minimum_version 1.5.0
 
@@ -34,7 +34,7 @@ teardown_file() {
   run -0 gpu_kernel_logs
 }
 
-# bats test_tags=platform:imx8, platform:imx95, platform:am62, platform:upstream
+# bats test_tags=platform:imx8, platform:imx95, platform:am62, platform:am62p, platform:upstream, platform:am69
 @test "Qt6 shapedclock runs" {
   bats_require_minimum_version 1.5.0
 
@@ -46,7 +46,7 @@ teardown_file() {
   run -0 gpu_kernel_logs
 }
 
-# bats test_tags=platform:imx8, platform:imx95, platform:am62, platform:upstream
+# bats test_tags=platform:imx8, platform:imx95, platform:am62, platform:am62p, platform:upstream, platform:am69
 @test "Qt6 can create OpenGL ES context" {
   bats_require_minimum_version 1.5.0
 
@@ -54,7 +54,7 @@ teardown_file() {
 
   run docker container exec qt6-wayland-tests contextinfo
 
-  assert_output --regexp "OpenGL Version: OpenGL ES [23]\.[02].*"
+  assert_output --regexp "OpenGL Version: OpenGL ES [23]\.[012].*"
 
   run -0 gpu_kernel_logs
 }
